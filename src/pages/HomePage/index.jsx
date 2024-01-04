@@ -1,5 +1,12 @@
+import { Banner } from '../../components/Banner';
+import { RoomList } from '../../components/RoomList';
 import './style.css';
 
 export const HomePage = () => {
-  return <div className="container"></div>;
+  return (
+    <>
+      <Banner />
+      <RoomList />
+    </>
+  );
 };
