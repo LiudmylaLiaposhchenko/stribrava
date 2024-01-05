@@ -1,5 +1,3 @@
-// import './style.css';
-
 export const Contact = () => {
   return (
     <section className="dark">
