@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './style.css';
 
-export const RoomDetail = ({ type, price, src, description }) => {
+export const RoomDetail = ({ type, price, src, description, id }) => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [numPeople, setNumPeople] = useState(1);
@@ -21,7 +21,12 @@ export const RoomDetail = ({ type, price, src, description }) => {
     mealPriceDay = 500;
   }
 
-  const numDays = 3;
+  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+  const numDays = Math.round(
+    (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+      MILLISECONDS_PER_DAY,
+  );
+
   const roomPrice = numDays * numPeople * price;
   const mealPrice = numDays * numPeople * mealPriceDay;
   const petPrice = pet ? (roomPrice + mealPrice) * 0.25 : 0;
@@ -39,7 +44,33 @@ export const RoomDetail = ({ type, price, src, description }) => {
             <img src={`http://localhost:4000/assets/${src}`} alt="" />
             <p>{description}</p>
           </div>
-          <form>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const response = await fetch('http://localhost:4000/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  roomId: id,
+                  status: 'new',
+                  dateFrom,
+                  dateTo,
+                  numPeople: Number(numPeople),
+                  meal,
+                  pet,
+                  child,
+                  accessible,
+                  email,
+                  phone,
+                }),
+              });
+              alert(
+                response.status === 201
+                  ? 'Poptávka byla odeslana'
+                  : 'Chyba! Udelejte ještě krat',
+              );
+            }}
+          >
             <div className="form-fields">
               <label htmlFor="field1" className="field-label">
                 Od:
@@ -148,7 +179,11 @@ export const RoomDetail = ({ type, price, src, description }) => {
                 required
               />
             </div>
-            <h3>Celková cena za pobyt {total} kč</h3>
+            <h3>
+              {dateFrom === '' || dateTo === ''
+                ? 'Choose a date, please'
+                : `Celková cena za pobyt ${total} kč`}
+            </h3>
             <button className="wide">Odeslat poptávku</button>
           </form>
         </div>
